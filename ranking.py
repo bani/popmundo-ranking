@@ -1,19 +1,31 @@
+# -*- coding: utf-8 -*-
+
 import urllib
 import re
-
+import logging
+import cgi
+import string
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
-
-class Artist:
-    artistId = 0
-    name = ""
-    rank = 1
+from google.appengine.ext import db
+from google.appengine.api import users
+from model import Artist
+from model import Genre
 
 class RankWriter(webapp.RequestHandler):
-    def writeRank(self,bands,genre):
+    " " " Classe responsavel por obter todas as informacoes de cada banda e gerar o html com o resultado " " "
+    
+    def createRank(self, bands, genre, save):
+        rank = self.getInfo(bands, genre)
+        self.printHtml(rank, genre)
+        if save:
+            logging.info("Atualizando dados na base para " + genre)
+            self.save(rank)
+
+    def getInfo(self, bands, genre):
         rankList = []
         for artistId in bands:
-            x = Artist()
+            x = Artist(key_name=str(artistId))
             x.artistId = artistId
             try:
                 site = urllib.urlopen("http://www.popmundo.com/Common/Artist.asp?action=view&ArtistID=%d"  % (artistId)).read()    
@@ -23,44 +35,58 @@ class RankWriter(webapp.RequestHandler):
                 x.rank = 99999
                 x.name = "ERRO"
             rankList.append(x)
-        
-        self.response.out.write("<HTML><HEAD><TITLE>%s - pt</TITLE></HEAD><BODY><FONT FACE=Arial SIZE=-1>" % (genre))
-    
         rankList.sort(key=lambda x:x.rank)
-        i = 1
-        for position in rankList:
-            if i%10==1:
-                self.response.out.write("<br>")
-                self.response.out.write("<b><i>TOP ")
-                self.response.out.write(i/10+1)
-                self.response.out.write("0:</i></b><br>")
-            self.response.out.write("%02d" % i)
-            self.response.out.write(" #")
-            self.response.out.write("<b>%03d</b>" % position.rank)
-            self.response.out.write(" [artistid=%d name=%s]" % (position.artistId, position.name))
-            self.response.out.write("<br>")
-            i+=1
-        self.response.out.write("</FONT></BODY></HTML>")
+        return rankList
 
-class MainPage(RankWriter):
+    def printHtml(self, rank, genre):
+        html = "<HTML><HEAD><TITLE>%s - pt</TITLE></HEAD><BODY><FONT FACE=Arial SIZE=-1>" % (genre)
+        i = 1
+        for position in rank:
+            oldRank = db.get(position.key())
+            if oldRank is None:
+            	oldRank = Artist(brRank=i,rank=position.rank)
+            if i%10==1:
+                html += "<br>"
+                html += "<b><i>TOP "
+                html += str(i/10+1)
+                html += "0:</i></b><br>"
+            html += "%02d" % i
+            brDiff = oldRank.brRank - i
+            html += " (%s)" % ("=" if brDiff == 0 else str(brDiff) if brDiff < 0 else "+"+str(brDiff))
+            html += " #"
+            html += "<b>%03d</b>" % position.rank
+            html += " [artistid=%d name=%s]" % (position.artistId, position.name.decode("utf-8"))
+            globalDiff = oldRank.rank - position.rank
+            html += " (%s)" % ("=" if globalDiff == 0 else str(globalDiff) if globalDiff < 0 else "+"+str(globalDiff))
+            html += "<br>"
+            i+=1
+        html += "</FONT></BODY></HTML>"
+        self.response.out.write(html)
+
+    def save(self, rank):
+        i = 1
+        for position in rank:
+            position.brRank = i
+            position.put()
+            i+=1
+
+class Classica(RankWriter):
     def get(self):
-        br = [113188, 808615, 726273, 339774, 1463261, 1151965, 1195728, 39303, 313967, 1281661, 1531321, 1343033, 1052575, 1418803, 307738, 1277278, 1005654, 1401702, 1445010, 357148, 1043727, 1353451, 1565808, 1508232, 1489418, 854190, 855456, 1463301, 1392207, 744395, 133680, 1423891, 1268107, 385407, 1620949, 1651907, 1608536, 1647328, 1418691]
-        self.writeRank(br,'Classical')
+        save = (cgi.escape(self.request.get('save')))
+        genre = db.GqlQuery("SELECT * FROM Genre WHERE name = 'Classical'").fetch(1)[0]
+        logging.info("Gerando ranking de musica classica")
+        self.createRank(genre.ids, genre.name, True if save == "true" else False)
         
 class Latina(RankWriter):
     def get(self):
-        br = [948336, 894957, 104252, 165655, 329990, 1014075, 96062, 44674, 223858, 220085, 230885, 59564, 1642306, 1610108, 952064, 1670412]
-        self.writeRank(br,'Latin Music')
-        
-class Jazz(RankWriter):
-    def get(self):
-        br = [521474, 498898, 66804]
-        self.writeRank(br,'Jazz')
+        genre = db.GqlQuery("SELECT * FROM Genre WHERE name = 'Latin Music'").fetch(1)[0]
+        logging.info("Gerando ranking de musica latina")
+        self.createRank(genre.ids, genre.name, True)
 
 application = webapp.WSGIApplication(
-                                     [('/', MainPage),
-                                     ('/latina', Latina),
-                                     ('/jazz', Jazz)],
+                                     [('/', Classica),
+                                     ('/classica', Classica),
+                                     ('/latina', Latina)],
                                      debug=True)
 
 def main():

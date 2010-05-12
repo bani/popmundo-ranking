@@ -1,0 +1,19 @@
+application: classicamundo
+version: 5
+runtime: python
+api_version: 1
+
+handlers:
+- url: /admin/.*
+  script: admin.py
+  login: admin
+
+- url: /a
+  static_dir: admin
+  login: admin
+  
+- url: /static
+  static_dir: static
+
+- url: /.*
+  script: ranking.py
