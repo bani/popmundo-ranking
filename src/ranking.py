@@ -12,12 +12,11 @@ from model import Artist
 
 class RankWriter(webapp.RequestHandler):
     " " " Classe responsavel por obter todas as informacoes de cada banda e gerar o html com o resultado " " "
-    update = False
     
     def createRank(self, bands, genre, save):
         rank = self.getInfo(bands, genre)
         self.printHtml(rank, genre)
-        if save and self.update:
+        if save:
             logging.info("Atualizando dados na base para " + genre)
             self.save(rank)
 
@@ -59,11 +58,9 @@ class RankWriter(webapp.RequestHandler):
             html += " (%s)" % ("=" if globalDiff == 0 else str(globalDiff) if globalDiff < 0 else "+"+str(globalDiff))
             html += "<br>"
             i+=1
-            if not globalDiff == 0:
-                self.update = True
-        if self.update:
-            today = datetime.date.today()
-            html+=("<br/><br/>Ranking atualizado em " + today.strftime("%d/%m/%Y"))
+
+        today = datetime.date.today()
+        html+=("<br/><br/>Ranking atualizado em " + today.strftime("%d/%m/%Y"))
         html += "</FONT></BODY></HTML>"
         self.response.out.write(html)
 
