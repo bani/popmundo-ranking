@@ -7,6 +7,7 @@ class Artist(db.Model):
     name = ""
     rank = db.IntegerProperty()
     brRank = db.IntegerProperty()
+    genre = db.IntegerProperty()
     
 class Genre(db.Model):
     name = db.StringProperty(required=True)

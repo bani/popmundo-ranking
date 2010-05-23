@@ -5,9 +5,11 @@ import re
 import logging
 import cgi
 import datetime
+import urllib
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
+from google.appengine.api import urlfetch
 from model import Artist
 
 class RankWriter(webapp.RequestHandler):
@@ -15,29 +17,53 @@ class RankWriter(webapp.RequestHandler):
     
     def createRank(self, bands, genre, save):
         rank = self.getInfo(bands, genre)
-        self.printHtml(rank, genre)
+        self.printHtml(rank)
         if save:
-            logging.info("Atualizando dados na base para " + genre)
+            logging.info("Atualizando dados na base")
             self.save(rank)
+            
+    def getFullRank(self, genre):
+        rank = ""
+        for division in range(2, 12):
+            form_fields = {
+                           "CountryID": "0",
+                           "GenreTypeID": genre,
+                           "DivisionID": division
+            }
+            form_data = urllib.urlencode(form_fields)
+            rank += urlfetch.fetch(url="http://www.popmundo.com/common/Charts.asp?action=ArtistRankings",
+                            payload=form_data,
+                            method=urlfetch.POST,
+                            headers={'Content-Type': 'application/x-www-form-urlencoded'}).content
+        return rank
+
 
     def getInfo(self, bands, genre):
         rankList = []
+        fullRank = self.getFullRank(genre)
         for artistId in bands:
             x = Artist(key_name=str(artistId))
             x.artistId = artistId
+            x.genre = genre
             try:
-                site = urllib.urlopen("http://www.popmundo.com/Common/Artist.asp?action=view&ArtistID=%d"  % (artistId)).read()    
-                x.rank = int(re.search ( '<b>#(\d+)</b> %s artist.' % genre, site).group(1))
-                x.name = re.search ( 'document.title = "Popmundo - (.+)"', site ).group(1)
+                pos = fullRank.index('<a href="Artist.asp?action=view&ArtistID=%d">' % artistId)
+                posRank = fullRank.rindex('&nbsp;',0,pos) + 6
+                x.rank = int(fullRank[posRank:fullRank.rindex('</td>',posRank,pos)])
+                posName = fullRank.index('">',pos) + 2
+                x.name = fullRank[posName:fullRank.index('</',posName)]
+                rankList.append(x)
             except:
                 x.rank = 99999
                 x.name = "ERRO"
-            rankList.append(x)
+                logging.error("Banda %d nao encontrada para o genero %d" % (artistId, genre))
+
         rankList.sort(key=lambda x:x.rank)
         return rankList
 
-    def printHtml(self, rank, genre):
-        html = "<HTML><HEAD><TITLE>%s - pt</TITLE></HEAD><BODY><FONT FACE=Arial SIZE=-1>" % (genre)
+    def printHtml(self, rank):
+        html = "<HTML><HEAD><TITLE>Ranking Brasil/Portugal</TITLE></HEAD><BODY><FONT FACE=Arial SIZE=-1>"
+        today = datetime.date.today()
+        html+=("Atualizado em %s<br/><br/>" % today.strftime("%d/%m/%Y"))
         i = 1
         for position in rank:
             oldRank = db.get(position.key())
@@ -58,9 +84,6 @@ class RankWriter(webapp.RequestHandler):
             html += " (%s)" % ("=" if globalDiff == 0 else str(globalDiff) if globalDiff < 0 else "+"+str(globalDiff))
             html += "<br>"
             i+=1
-
-        today = datetime.date.today()
-        html+=("<br/><br/>Ranking atualizado em " + today.strftime("%d/%m/%Y"))
         html += "</FONT></BODY></HTML>"
         self.response.out.write(html)
 
@@ -76,19 +99,20 @@ class Classica(RankWriter):
         save = (cgi.escape(self.request.get('save')))
         genre = db.GqlQuery("SELECT * FROM Genre WHERE name = 'Classical'").fetch(1)[0]
         logging.info("Gerando ranking de musica classica")
-        self.createRank(genre.ids, genre.name, True if save == "true" else False)
+        self.createRank(genre.ids, 16, True if save == "true" else False)
         
 class Latina(RankWriter):
     def get(self):
         genre = db.GqlQuery("SELECT * FROM Genre WHERE name = 'Latin Music'").fetch(1)[0]
         logging.info("Gerando ranking de musica latina")
-        self.createRank(genre.ids, genre.name, True)
+        self.createRank(genre.ids, 17, True)
 
 application = webapp.WSGIApplication(
-                                     [('/', Classica),
-                                     ('/classica', Classica),
-                                     ('/latina', Latina)],
-                                     debug=True)
+                                     [
+                                      ('/', Classica),
+                                      ('/classica', Classica),
+                                      ('/latina', Latina)],
+                                      debug=True)
 
 def main():
     run_wsgi_app(application)
