@@ -10,5 +10,6 @@ class Artist(db.Model):
     genre = db.IntegerProperty()
     
 class Genre(db.Model):
+    id = db.IntegerProperty(required=True)
     name = db.StringProperty(required=True)
-    ids = db.ListProperty(int)
+    bands = db.ListProperty(int)

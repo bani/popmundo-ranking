@@ -15,9 +15,9 @@ from model import Artist
 class RankWriter(webapp.RequestHandler):
     " " " Classe responsavel por obter todas as informacoes de cada banda e gerar o html com o resultado " " "
     
-    def createRank(self, bands, genre, save):
-        rank = self.getInfo(bands, genre)
-        self.printHtml(rank)
+    def createRank(self, genre, save):
+        rank = self.getInfo(genre.bands, genre.id)
+        self.printHtml(rank, genre.name)
         if save:
             logging.info("Atualizando dados na base")
             self.save(rank)
@@ -55,13 +55,13 @@ class RankWriter(webapp.RequestHandler):
             except:
                 x.rank = 99999
                 x.name = "ERRO"
-                logging.error("Banda %d nao encontrada para o genero %d" % (artistId, genre))
+                x.put()
 
         rankList.sort(key=lambda x:x.rank)
         return rankList
 
-    def printHtml(self, rank):
-        html = "<HTML><HEAD><TITLE>Ranking Brasil/Portugal</TITLE></HEAD><BODY><FONT FACE=Arial SIZE=-1>"
+    def printHtml(self, rank, genre):
+        html = "<HTML><HEAD><TITLE>Ranking Brasil/Portugal - %s</TITLE></HEAD><BODY><FONT FACE=Arial SIZE=-1>" % genre
         today = datetime.date.today()
         html+=("Atualizado em %s<br/><br/>" % today.strftime("%d/%m/%Y"))
         i = 1
@@ -97,21 +97,30 @@ class RankWriter(webapp.RequestHandler):
 class Classica(RankWriter):
     def get(self):
         save = (cgi.escape(self.request.get('save')))
-        genre = db.GqlQuery("SELECT * FROM Genre WHERE name = 'Classical'").fetch(1)[0]
+        genre = db.GqlQuery("SELECT * FROM Genre WHERE id = 16").fetch(1)[0]
         logging.info("Gerando ranking de musica classica")
-        self.createRank(genre.ids, 16, True if save == "true" else False)
+        self.createRank(genre, True if save == "true" else False)
         
 class Latina(RankWriter):
     def get(self):
-        genre = db.GqlQuery("SELECT * FROM Genre WHERE name = 'Latin Music'").fetch(1)[0]
+        genre = db.GqlQuery("SELECT * FROM Genre WHERE id = 17").fetch(1)[0]
         logging.info("Gerando ranking de musica latina")
-        self.createRank(genre.ids, 17, True)
+        self.createRank(genre, True)
+
+class ListUnranked(webapp.RequestHandler):
+    " " " Lista as bandas que nao conseguiram entrar no rank na ultima atualizacao " " "
+    def get(self):
+        genres = {16: 'Classica', 17: 'Latina'}
+        unranked = db.GqlQuery("SELECT * FROM Artist WHERE rank = 99999").fetch(10)
+        for band in unranked:
+            self.response.out.write("%s: <a href='http://www.popmundo.com/Common/Artist.asp?action=view&ArtistID=%d'>banda fora do ranking</a><br/>" % (genres[band.genre], band.artistId))
 
 application = webapp.WSGIApplication(
                                      [
                                       ('/', Classica),
                                       ('/classica', Classica),
-                                      ('/latina', Latina)],
+                                      ('/latina', Latina),
+                                      ('/list', ListUnranked)],
                                       debug=True)
 
 def main():
