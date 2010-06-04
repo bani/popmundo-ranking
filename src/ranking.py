@@ -54,6 +54,7 @@ class RankWriter(webapp.RequestHandler):
                 rankList.append(x)
             except:
                 x.rank = 99999
+                x.brRank = 999
                 x.name = "ERRO"
                 x.put()
 
@@ -66,24 +67,27 @@ class RankWriter(webapp.RequestHandler):
         html+=("Atualizado em %s<br/><br/>" % today.strftime("%d/%m/%Y"))
         i = 1
         for position in rank:
-            oldRank = db.get(position.key())
-            if oldRank is None:
-                oldRank = Artist(brRank=i,rank=position.rank)
-            if i%10==1:
+            try:
+                oldRank = db.get(position.key())
+                if oldRank is None:
+                    oldRank = Artist(brRank=i,rank=position.rank)
+                if i%10==1:
+                    html += "<br>"
+                    html += "<b><i>TOP "
+                    html += str(i/10+1)
+                    html += "0:</i></b><br>"
+                html += "%02d" % i
+                brDiff = oldRank.brRank - i
+                html += " (%s)" % ("=" if brDiff == 0 else str(brDiff) if brDiff < 0 else "+"+str(brDiff))
+                html += " #"
+                html += "<b>%03d</b>" % position.rank
+                html += " [artistid=%d name=%s]" % (position.artistId, position.name.decode("utf-8"))
+                globalDiff = oldRank.rank - position.rank
+                html += " (%s)" % ("=" if globalDiff == 0 else str(globalDiff) if globalDiff < 0 else "+"+str(globalDiff))
                 html += "<br>"
-                html += "<b><i>TOP "
-                html += str(i/10+1)
-                html += "0:</i></b><br>"
-            html += "%02d" % i
-            brDiff = oldRank.brRank - i
-            html += " (%s)" % ("=" if brDiff == 0 else str(brDiff) if brDiff < 0 else "+"+str(brDiff))
-            html += " #"
-            html += "<b>%03d</b>" % position.rank
-            html += " [artistid=%d name=%s]" % (position.artistId, position.name.decode("utf-8"))
-            globalDiff = oldRank.rank - position.rank
-            html += " (%s)" % ("=" if globalDiff == 0 else str(globalDiff) if globalDiff < 0 else "+"+str(globalDiff))
-            html += "<br>"
-            i+=1
+                i+=1
+            except:
+                logging.error("Erro ao imprimir artista %d", position.artistId)
         html += "</FONT></BODY></HTML>"
         self.response.out.write(html)
 
