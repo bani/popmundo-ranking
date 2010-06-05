@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import urllib
-import re
 import logging
 import cgi
 import datetime
-import urllib
+
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
@@ -114,7 +113,7 @@ class Latina(RankWriter):
 class ListUnranked(webapp.RequestHandler):
     " " " Lista as bandas que nao conseguiram entrar no rank na ultima atualizacao " " "
     def get(self):
-        genres = {16: 'Classica', 17: 'Latina'}
+        genres = {16: 'Classica', 17: 'Latina', 99: 'Remover'}
         unranked = db.GqlQuery("SELECT * FROM Artist WHERE rank = 99999").fetch(10)
         for band in unranked:
             self.response.out.write("%s: <a href='http://www.popmundo.com/Common/Artist.asp?action=view&ArtistID=%d'>banda fora do ranking</a><br/>" % (genres[band.genre], band.artistId))

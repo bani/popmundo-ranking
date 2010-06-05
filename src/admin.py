@@ -6,6 +6,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 from model import Genre
+from model import Artist
 
 class Manage(webapp.RequestHandler):
     " " " Adiciona ou remove bandas do ranking " " "
@@ -17,6 +18,12 @@ class Manage(webapp.RequestHandler):
         if exists:
             logging.info("Removendo a banda %d do genero %s" % (id, artistList.name))
             artistList.bands.remove(id)
+            removed = Artist(key_name=str(id))
+            removed.artistId = id
+            removed.genre = 99
+            removed.brRank = 999
+            removed.rank = 99999
+            removed.put()
         else:
             logging.info("Adicionando a banda %d para o genero %s"  % (id, artistList.name))
             artistList.bands.append(id)
