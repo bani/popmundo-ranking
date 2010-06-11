@@ -43,11 +43,19 @@ class Create(webapp.RequestHandler):
         classica.put()
         latina = Genre(id=17, name='Latina', bands=[948336, 894957, 104252, 165655, 329990, 1014075, 96062, 44674, 223858, 220085, 230885, 1642306, 1610108, 1670412, 819632])
         latina.put()
+        modernrock = Genre(id=4, name='Modern Rock', bands=[59459, 237592, 229055, 380939, 494751, 459617, 582172, 47124, 1485900, 287309, 1346842, 88786, 792062, 932064, 440039, 225831, 95601, 794125, 649206, 185570, 94328, 371271, 214999, 76251, 779202, 517415, 255687, 1083916, 360550, 197107, 1602933])
+        modernrock.put()
         teste = Genre(id=1, name='Teste', bands=[1,2])
         teste.put()
+
+class New(webapp.RequestHandler):
+    " " " Cria uma nova tabela de generos (necessario editar manualmente) " " "
+    def get(self):
+        logging.info("Criando novo genero")
+
         
 application = webapp.WSGIApplication(
-                                     [('/admin/update', Manage), ('/admin/create', Create), ('/admin', Redirect)],
+                                     [('/admin/update', Manage), ('/admin/create', Create), ('/admin/new', New), ('/admin', Redirect)],
                                      debug=True)
 
 def main():

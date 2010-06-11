@@ -109,11 +109,17 @@ class Latina(RankWriter):
         genre = db.GqlQuery("SELECT * FROM Genre WHERE id = 17").fetch(1)[0]
         logging.info("Gerando ranking de musica latina")
         self.createRank(genre, True)
+        
+class ModernRock(RankWriter):
+    def get(self):
+        genre = db.GqlQuery("SELECT * FROM Genre WHERE id = 4").fetch(1)[0]
+        logging.info("Gerando ranking de modern rock")
+        self.createRank(genre, True)
 
 class ListUnranked(webapp.RequestHandler):
     " " " Lista as bandas que nao conseguiram entrar no rank na ultima atualizacao " " "
     def get(self):
-        genres = {16: 'Classica', 17: 'Latina', 99: 'Remover'}
+        genres = {16: 'Classica', 17: 'Latina', 4: 'Modern Rock', 99: 'Remover'}
         unranked = db.GqlQuery("SELECT * FROM Artist WHERE rank = 99999").fetch(10)
         for band in unranked:
             self.response.out.write("%s: <a href='http://www.popmundo.com/Common/Artist.asp?action=view&ArtistID=%d'>banda fora do ranking</a><br/>" % (genres[band.genre], band.artistId))
@@ -123,6 +129,7 @@ application = webapp.WSGIApplication(
                                       ('/', Classica),
                                       ('/classica', Classica),
                                       ('/latina', Latina),
+                                      ('/mr', ModernRock),
                                       ('/list', ListUnranked)],
                                       debug=True)
 
