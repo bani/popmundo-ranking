@@ -14,12 +14,9 @@ from model import Artist
 class RankWriter(webapp.RequestHandler):
     " " " Classe responsavel por obter todas as informacoes de cada banda e gerar o html com o resultado " " "
     
-    def createRank(self, genre, save):
+    def createRank(self, genre):
         rank = self.getInfo(genre.bands, genre.id)
-        self.printHtml(rank, genre.name)
-        if save:
-            logging.info("Atualizando dados na base")
-            self.save(rank)
+        self.save(rank)
             
     def getFullRank(self, genre):
         rank = ""
@@ -34,7 +31,8 @@ class RankWriter(webapp.RequestHandler):
                             payload=form_data,
                             method=urlfetch.POST,
                             headers={'Content-Type': 'application/x-www-form-urlencoded'}).content
-        return rank
+            rankUTF8=rank.decode("utf-8")
+        return rankUTF8
 
 
     def getInfo(self, bands, genre):
@@ -51,38 +49,47 @@ class RankWriter(webapp.RequestHandler):
                 posName = fullRank.index('">',pos) + 2
                 x.name = fullRank[posName:fullRank.index('</',posName)]
                 rankList.append(x)
-            except:
+            except Exception, e:
+                logging.debug("Banda: " + str(artistId) + ". Erro: " + str(e))
                 x.rank = 99999
                 x.brRank = 999
                 x.name = "ERRO"
-                x.put()
 
         rankList.sort(key=lambda x:x.rank)
+        self.calculateDiff(rankList)
+        
         return rankList
-
+    
+    def calculateDiff(self, rank):
+        i = 0
+        for x in rank:
+            i+=1
+            saveData = db.get(x.key())
+            x.brRank = i
+            try:
+                x.diff = saveData.rank - x.rank
+                x.brDiff = saveData.brRank - i
+            except:
+                x.diff = 0
+                x.brDiff = 0
+        
     def printHtml(self, rank, genre):
-        html = "<HTML><HEAD><TITLE>Ranking Brasil/Portugal - %s</TITLE></HEAD><BODY><FONT FACE=Arial SIZE=-1>" % genre
-        today = datetime.date.today()
-        html+=("Atualizado em %s<br/><br/>" % today.strftime("%d/%m/%Y"))
+        html = "<HTML><HEAD><TITLE>Ranking Brasil/Portugal - %s</TITLE></HEAD><BODY><FONT FACE=Arial SIZE=-1>" % genre.name
+        html+=("Atualizado em %s<br/><br/>" % genre.lastUpdate.strftime("%d/%m/%Y"))
         i = 1
         for position in rank:
             try:
-                oldRank = db.get(position.key())
-                if oldRank is None:
-                    oldRank = Artist(brRank=i,rank=position.rank)
                 if i%10==1:
                     html += "<br>"
                     html += "<b><i>TOP "
                     html += str(i/10+1)
                     html += "0:</i></b><br>"
-                html += "%02d" % i
-                brDiff = oldRank.brRank - i
-                html += " (%s)" % ("=" if brDiff == 0 else str(brDiff) if brDiff < 0 else "+"+str(brDiff))
+                html += "%02d" % position.brRank
+                html += " (%s)" % ("=" if position.brDiff == 0 else str(position.brDiff) if position.brDiff < 0 else "+"+str(position.brDiff))
                 html += " #"
                 html += "<b>%03d</b>" % position.rank
-                html += " [artistid=%d name=%s]" % (position.artistId, position.name.decode("utf-8"))
-                globalDiff = oldRank.rank - position.rank
-                html += " (%s)" % ("=" if globalDiff == 0 else str(globalDiff) if globalDiff < 0 else "+"+str(globalDiff))
+                html += " [artistid=%d name=%s]" % (position.artistId, position.name)
+                html += " (%s)" % ("=" if position.diff == 0 else str(position.diff) if position.diff < 0 else "+"+str(position.diff))
                 html += "<br>"
                 i+=1
             except:
@@ -91,45 +98,63 @@ class RankWriter(webapp.RequestHandler):
         self.response.out.write(html)
 
     def save(self, rank):
-        i = 1
+        if len(rank) == 0 or rank[0].rank == 99999:
+            return
+        logging.info("Atualizando dados na base")
         for position in rank:
-            position.brRank = i
             position.put()
-            i+=1
+        genre = db.GqlQuery("SELECT * FROM Genre WHERE id = :1", rank[0].genre).fetch(1)[0]
+        genre.lastUpdate = datetime.date.today()
+        genre.put()
+        
+    def go(self, id, name):
+        force = (cgi.escape(self.request.get('save')))
+        genre = db.GqlQuery("SELECT * FROM Genre WHERE id = :1", id).fetch(1)[0]
+        save = force == "true" or genre.lastUpdate < datetime.date.today() - datetime.timedelta(days=1)
+        if id == 16:
+            save = True if force == "true" else False
+        if save:
+            logging.info("Gerando ranking de " + name)
+            self.createRank(genre)
+        logging.info("=> Ranking de " + name) 
+        rank = db.GqlQuery("SELECT * FROM Artist WHERE genre = :1 ORDER BY rank", id).fetch(100)
+        self.printHtml(rank, genre)
 
 class Classica(RankWriter):
     def get(self):
-        save = (cgi.escape(self.request.get('save')))
-        genre = db.GqlQuery("SELECT * FROM Genre WHERE id = 16").fetch(1)[0]
-        logging.info("Gerando ranking de musica classica")
-        self.createRank(genre, True if save == "true" else False)
+        self.go(16, "musica classica")
         
 class Latina(RankWriter):
     def get(self):
-        genre = db.GqlQuery("SELECT * FROM Genre WHERE id = 17").fetch(1)[0]
-        logging.info("Gerando ranking de musica latina")
-        self.createRank(genre, True)
+        self.go(17, "musica latina")
         
 class ModernRock(RankWriter):
     def get(self):
-        genre = db.GqlQuery("SELECT * FROM Genre WHERE id = 4").fetch(1)[0]
-        logging.info("Gerando ranking de modern rock")
-        self.createRank(genre, True)
+        self.go(4, "modern rock")
+        
+class HeavyMetal(RankWriter):
+    def get(self):
+        self.go(5, "heavy metal")
 
 class ListUnranked(webapp.RequestHandler):
     " " " Lista as bandas que nao conseguiram entrar no rank na ultima atualizacao " " "
     def get(self):
-        genres = {16: 'Classica', 17: 'Latina', 4: 'Modern Rock', 99: 'Remover'}
+        genres = {16: 'Classica', 17: 'Latina', 4: 'Modern Rock', 5: 'Heavy Metal', 99: 'Remover'}
         unranked = db.GqlQuery("SELECT * FROM Artist WHERE rank = 99999").fetch(10)
         for band in unranked:
             self.response.out.write("%s: <a href='http://www.popmundo.com/Common/Artist.asp?action=view&ArtistID=%d'>banda fora do ranking</a><br/>" % (genres[band.genre], band.artistId))
 
+class Home(RankWriter):
+    def get(self):
+        self.redirect("/classica")
+
 application = webapp.WSGIApplication(
                                      [
-                                      ('/', Classica),
+                                      ('/', Home),
                                       ('/classica', Classica),
                                       ('/latina', Latina),
                                       ('/mr', ModernRock),
+                                      ('/hm', HeavyMetal),
                                       ('/list', ListUnranked)],
                                       debug=True)
 
