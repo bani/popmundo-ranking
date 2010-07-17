@@ -16,7 +16,7 @@ form {
 	margin:1em;
 	width:27em;
 }
-label {
+label.left{
 	float:left;
 	width:10em;
 	text-align:right;
@@ -43,6 +43,10 @@ input:hover, input:focus {
 	border-color:#c5c5c5;
 	background:#f6f6f6;
 } 
+input.check{
+	padding:0em;
+	width:2em;
+}
 fieldset {
 	border:1px solid #ddd;
 	padding:0 0.5em 0.5em;
