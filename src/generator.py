@@ -19,7 +19,7 @@ class RankGenerator():
             
     def readChart(self, genre):
         chart = ""
-        for division in range(2, 12):
+        for division in range(1, 13):
             form_fields = {
                            "CountryID": "0",
                            "GenreTypeID": genre,
