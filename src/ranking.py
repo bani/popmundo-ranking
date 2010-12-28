@@ -8,32 +8,21 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 import model
 from generator import RankGenerator
+import os
+from google.appengine.ext.webapp import template
 
 class RankWriter(webapp.RequestHandler):
     def printHtml(self, rank, genre):
-        html = "<HTML><HEAD><TITLE>Ranking Brasil/Portugal - %s</TITLE></HEAD><BODY><FONT FACE=Arial SIZE=-1>" % genre.name
-        html+=("Atualizado em %s<br/><br/>" % genre.lastUpdate.strftime("%d/%m/%Y"))
-        i = 1
         for position in rank:
             try:
-                if i%10==1:
-                    html += "<br>"
-                    html += "<b><i>TOP "
-                    html += str(i/10+1)
-                    html += "0:</i></b><br>"
-                html += "%02d" % position.brRank
-                html += " (%s)" % ("=" if position.brDiff == 0 else str(position.brDiff) if position.brDiff < 0 else "+"+str(position.brDiff))
-                html += " #"
-                html += "<b>%03d</b>" % position.rank
-                html += " [artistid=%d name=%s]" % (position.artistId, position.name)
-                html += " (%s)" % ("=" if position.diff == 0 else str(position.diff) if position.diff < 0 else "+"+str(position.diff))
-                html += "<br>"
-                i+=1
+                position.changeBr = "(%s)" % ("=" if position.brDiff == 0 else str(position.brDiff) if position.brDiff < 0 else "+"+str(position.brDiff))
+                position.changeWorld = "(%s)" % ("=" if position.diff == 0 else str(position.diff) if position.diff < 0 else "+"+str(position.diff))
             except:
                 logging.error("Erro ao imprimir artista %d", position.artistId)
-        html += "</FONT></BODY></HTML>"
-        self.response.out.write(html)
-  
+        template_values = {'bandas': rank, 'genero': genre.name,'data': genre.lastUpdate.strftime("%d/%m/%Y")}
+        path = os.path.join(os.path.dirname(__file__), 'ranking.html')
+        self.response.out.write(template.render(path, template_values))
+
     def go(self, id, name):
         force = (cgi.escape(self.request.get('save')))
         genre = db.GqlQuery("SELECT * FROM Genre WHERE id = :1", id).fetch(1)[0]

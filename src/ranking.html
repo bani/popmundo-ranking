@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>Ranking Brasil/Portugal - {{ genero }}</title>
+    </head>
+    <body>
+        <font face=arial size=-1>
+            Atualizado em {{data}}
+            <br/><br/>
+            {% for banda in bandas %}
+                {% comment %}que falta faz o Django 1.2{% endcomment %}
+                {% ifequal forloop.counter0 0 %}<br><b><i>TOP 10:</i></b><br>{% endifequal %}
+                {% ifequal forloop.counter0 10 %}<br><b><i>TOP 20:</i></b><br>{% endifequal %}
+                {% ifequal forloop.counter0 20 %}<br><b><i>TOP 30:</i></b><br>{% endifequal %}
+                {% ifequal forloop.counter0 30 %}<br><b><i>TOP 40:</i></b><br>{% endifequal %}
+                {% ifequal forloop.counter0 40 %}<br><b><i>TOP 50:</i></b><br>{% endifequal %}
+                {{banda.brRank|stringformat:"02d"}} 
+                {{banda.changeBr}} 
+                #<b>{{banda.rank|stringformat:"03d"}}</b>
+                [artistid={{banda.artistId}} name={{banda.name}}]
+                {{banda.changeWorld}} 
+                <br>
+            {% endfor %}
+        </font>
+    </body>
+</html>
