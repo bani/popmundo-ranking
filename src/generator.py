@@ -48,7 +48,7 @@ class RankGenerator():
             except:
                 x.rank = 99999
                 x.brRank = 999
-                x.name = "ERRO"
+                x.name = "Fora do ranking"
             self.rank.append(x)
         self.rank.sort(key=lambda x:x.rank)
         self.calculateDiff()

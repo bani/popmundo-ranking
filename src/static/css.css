@@ -54,6 +54,13 @@ fieldset {
 input.default {
 	color:#bbb;
 }
+a#title {
+    color:#0b77b7;
+}
+.text {
+    font-size: 0.8em;
+    color:#222;
+}
 .submit {
 	margin-top:1em;
 	cursor:pointer !important; cursor:hand;
