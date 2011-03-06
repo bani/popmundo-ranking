@@ -63,13 +63,8 @@ class ListUnranked(webapp.RequestHandler):
         for band in unranked:
             self.response.out.write("%s: <a href='http://www.popmundo.com/Common/Artist.asp?action=view&ArtistID=%d'>banda fora do ranking</a><br/>" % (genres[band.genre], band.artistId))
 
-class Home(RankWriter):
-    def get(self):
-        self.redirect("/static/index.html")
-
 application = webapp.WSGIApplication(
                                      [
-                                      ('/', Home),
                                       ('/classica', Classica),
                                       ('/latina', Latina),
                                       ('/mr', ModernRock),

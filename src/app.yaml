@@ -1,9 +1,13 @@
 application: classicamundo
-version: 9
+version: 10
 runtime: python
 api_version: 1
 
 handlers:
+- url: /
+  upload: static/index.html
+  static_files: static/index.html
+
 - url: /admin.*
   script: admin.py
   login: admin
@@ -14,6 +18,13 @@ handlers:
   
 - url: /static
   static_dir: static
+  
+- url: /iris
+  upload: static/gravacao.html
+  static_files: static/gravacao.html
+  
+- url: /mail
+  script: mail.py
 
 - url: /.*
   script: ranking.py
