@@ -1,29 +1,42 @@
 <html>
     <head>
         <title>Ranking Brasil/Portugal - {{ genero }}</title>
+        <style type="text/css">
+            span.hide {
+                color: white;
+                font-size: 0.1em;
+            }
+        </style>
     </head>
     <body>
         <font face=arial size=-1>
-            Atualizado em {{data}}
+            <span class="hide">[b][u]</span><b>Ranking de {{genero}} - BR/PT</b><span class="hide">[u][/b]</span>
+            <br/>Atualizado em {{data}}
             <br/><br/>
             {% for banda in bandas %}
                 {% comment %}que falta faz o Django 1.2{% endcomment %}
-                {% ifequal forloop.counter0 0 %}<br><b><i>TOP 10:</i></b><br>{% endifequal %}
-                {% ifequal forloop.counter0 10 %}<br><b><i>TOP 20:</i></b><br>{% endifequal %}
-                {% ifequal forloop.counter0 20 %}<br><b><i>TOP 30:</i></b><br>{% endifequal %}
-                {% ifequal forloop.counter0 30 %}<br><b><i>TOP 40:</i></b><br>{% endifequal %}
-                {% ifequal forloop.counter0 40 %}<br><b><i>TOP 50:</i></b><br>{% endifequal %}
-                {% ifequal forloop.counter0 50 %}<br><b><i>TOP 60:</i></b><br>{% endifequal %}
-                {% ifequal forloop.counter0 60 %}<br><b><i>TOP 70:</i></b><br>{% endifequal %}
-                {% ifequal forloop.counter0 70 %}<br><b><i>TOP 80:</i></b><br>{% endifequal %}
-                {% ifequal forloop.counter0 80 %}<br><b><i>TOP 90:</i></b><br>{% endifequal %}
+                {% ifequal forloop.counter0 0 %}<br><span class="hide">[b]</span><b>TOP 10:</b><span class="hide">[/b]</span><br>{% endifequal %}
+                {% ifequal forloop.counter0 10 %}<br><span class="hide">[b]</span><b>TOP 20:</b><span class="hide">[/b]</span><br>{% endifequal %}
+                {% ifequal forloop.counter0 20 %}<br><span class="hide">[b]</span><b>TOP 30:</b><span class="hide">[/b]</span><br>{% endifequal %}
+                {% ifequal forloop.counter0 30 %}<br><span class="hide">[b]</span><b>TOP 40:</b><span class="hide">[/b]</span><br>{% endifequal %}
+                {% ifequal forloop.counter0 40 %}<br><span class="hide">[b]</span><b>TOP 50:</b><span class="hide">[/b]</span><br>{% endifequal %}
+                {% ifequal forloop.counter0 50 %}<br><span class="hide">[b]</span><b>TOP 60:</b><span class="hide">[/b]</span><br>{% endifequal %}
+                {% ifequal forloop.counter0 60 %}<br><span class="hide">[b]</span><b>TOP 70:</b><span class="hide">[/b]</span><br>{% endifequal %}
+                {% ifequal forloop.counter0 70 %}<br><span class="hide">[b]</span><b>TOP 80:</b><span class="hide">[/b]</span><br>{% endifequal %}
+                {% ifequal forloop.counter0 80 %}<br><span class="hide">[b]</span><b>TOP 90:</b><span class="hide">[/b]</span><br>{% endifequal %}
                 {{banda.brRank|stringformat:"02d"}} 
                 {{banda.changeBr}} 
                 #<b>{{banda.rank|stringformat:"03d"}}</b>
-                [artistid={{banda.artistId}} name={{banda.name}}]
+                <span class="hide">[artistid={{banda.artistId}} name=</span>{{banda.name}}<span class="hide">]</span>
                 {{banda.changeWorld}} 
                 <br>
             {% endfor %}
+            <br/>
+            <br/><span class="hide">[b]</span><b>Maior subida:</b><span class="hide">[/b]</span>
+            <br/><span class="hide">[artistid={{subida.artistId}} name=</span>{{subida.name}}<span class="hide">]</span> {{subida.changeWorld}}
+            <br/>
+            <br/><span class="hide">[b]</span><b>Maior queda:</b><span class="hide">[/b]</span>
+            <br/><span class="hide">[artistid={{queda.artistId}} name=</span>{{queda.name}}<span class="hide">]</span> {{queda.changeWorld}}
         </font>
     </body>
 </html>

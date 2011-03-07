@@ -19,7 +19,15 @@ class RankWriter(webapp.RequestHandler):
                 position.changeWorld = "(%s)" % ("=" if position.diff == 0 else str(position.diff) if position.diff < 0 else "+"+str(position.diff))
             except:
                 logging.error("Erro ao imprimir artista %d", position.artistId)
-        template_values = {'bandas': rank, 'genero': genre.name,'data': genre.lastUpdate.strftime("%d/%m/%Y")}
+                
+        rankCopy = []
+        rankCopy.extend(rank)
+        max = 30 if len(rankCopy) > 30 else len(rankCopy)
+        rankCopy = rankCopy[0:max]
+        rankCopy.sort(key=lambda x:x.diff, reverse=True)
+        subida = rankCopy[0]
+        queda = rankCopy[-1]
+        template_values = {'bandas': rank, 'genero': genre.name,'data': genre.lastUpdate.strftime("%d/%m/%Y"), 'subida': subida, 'queda': queda}
         path = os.path.join(os.path.dirname(__file__), 'ranking.html')
         self.response.out.write(template.render(path, template_values))
 
