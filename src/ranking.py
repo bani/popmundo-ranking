@@ -62,11 +62,15 @@ class HeavyMetal(RankWriter):
 class Eletronica(RankWriter):
     def get(self):
         self.go(7, "eletronica")
+        
+class Pop(RankWriter):
+    def get(self):
+        self.go(8, "pop")
 
 class ListUnranked(webapp.RequestHandler):
     " " " Lista as bandas que nao conseguiram entrar no rank na ultima atualizacao " " "
     def get(self):
-        genres = {16: 'Classica', 17: 'Latina', 4: 'Modern Rock', 5: 'Heavy Metal', 7: 'Eletronica',99: 'Remover'}
+        genres = {16: 'Classica', 17: 'Latina', 4: 'Modern Rock', 5: 'Heavy Metal', 7: 'Eletronica', 8: 'Pop', 99: 'Remover'}
         unranked = db.GqlQuery("SELECT * FROM Artist WHERE rank = 99999").fetch(100)
         for band in unranked:
             self.response.out.write("%s: <a href='http://www.popmundo.com/Common/Artist.asp?action=view&ArtistID=%d'>banda fora do ranking</a><br/>" % (genres[band.genre], band.artistId))
@@ -78,6 +82,7 @@ application = webapp.WSGIApplication(
                                       ('/mr', ModernRock),
                                       ('/hm', HeavyMetal),
                                       ('/eletronica', Eletronica),
+                                      ('/pop', Pop),
                                       ('/list', ListUnranked)],
                                       debug=True)
 

@@ -2,4 +2,4 @@
 .pydevproject
 .settings/
 src/*.pyc
-src/.tmp_*
+src/*/.tmp_*
