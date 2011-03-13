@@ -17,3 +17,8 @@ class Genre(db.Model):
     bands = db.ListProperty(int)
     lastUpdate = db.DateProperty()
 
+class Admin(db.Model):
+    email = db.EmailProperty(required=True)
+    charId = db.IntegerProperty()
+    charName = db.StringProperty()
+    genre = db.IntegerProperty()

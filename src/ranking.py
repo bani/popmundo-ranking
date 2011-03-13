@@ -67,6 +67,14 @@ class Pop(RankWriter):
     def get(self):
         self.go(8, "pop")
 
+class WorldMusic(RankWriter):
+    def get(self):
+        self.go(12, "world music")
+
+class Rock(RankWriter):
+    def get(self):
+        self.go(3, "rock")
+
 class ListUnranked(webapp.RequestHandler):
     " " " Lista as bandas que nao conseguiram entrar no rank na ultima atualizacao " " "
     def get(self):
@@ -83,6 +91,8 @@ application = webapp.WSGIApplication(
                                       ('/hm', HeavyMetal),
                                       ('/eletronica', Eletronica),
                                       ('/pop', Pop),
+                                      ('/worldmusic', WorldMusic),
+                                      ('/rock', Rock),
                                       ('/list', ListUnranked)],
                                       debug=True)
 

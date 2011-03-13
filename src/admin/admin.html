@@ -28,6 +28,8 @@
 						<option value="5">Heavy Metal</option>
                         <option value="7">Eletronica</option>
                         <option value="8">Pop</option>
+                        <option value="12">World Music</option>
+                        <option value="3">Rock</option>
 					</select>
 				</div>
 				
@@ -35,6 +37,30 @@
 				</fieldset>
 			</form>
 		</div>
+        <div>
+            <form action="/admin/user" method="get">
+                <fieldset><legend>Novo administrador</legend>
+                <div><label for="email" class="left">E-mail:</label> <input type="text" name="email" /></div>
+                <div><label for="charid" class="left">CharId:</label> <input type="text" name="charid" /></div>
+                <div><label for="charname" class="left">CharName:</label> <input type="text" name="charname" /></div>
+                <div><label for="genre" class="left">G&ecirc;nero:</label>
+                    <select name="genre">
+                        <option value="1">Teste</option>
+                        <option value="16">Classica</option>
+                        <option value="17">Latina</option>
+                        <option value="4">Modern Rock</option>
+                        <option value="5">Heavy Metal</option>
+                        <option value="7">Eletronica</option>
+                        <option value="8">Pop</option>
+                        <option value="12">World Music</option>
+                        <option value="3">Rock</option>
+                    </select>
+                </div>
+                
+                <div class="center"><input type="submit" value="Cadastrar" class="submit" /></div>
+                </fieldset>
+            </form>
+        </div>
 	</body>
 
 </html>
