@@ -65,7 +65,7 @@ class RankGenerator():
                     self.skipSave = False
             except:
                 x.diff = 0
-                x.brDiff = 0
+                x.brDiff = 99999
                 self.skipSave = False
             i+=1
                 

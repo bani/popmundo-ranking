@@ -15,7 +15,7 @@ class RankWriter(webapp.RequestHandler):
     def printHtml(self, rank, genre):
         for position in rank:
             try:
-                position.changeBr = "(%s)" % ("=" if position.brDiff == 0 else str(position.brDiff) if position.brDiff < 0 else "+"+str(position.brDiff))
+                position.changeBr = "(%s)" % ("=" if position.brDiff == 0 else "*" if position.brDiff == 99999 else str(position.brDiff) if position.brDiff < 0 else "+"+str(position.brDiff))
                 position.changeWorld = "(%s)" % ("=" if position.diff == 0 else str(position.diff) if position.diff < 0 else "+"+str(position.diff))
             except:
                 logging.error("Erro ao imprimir artista %d", position.artistId)

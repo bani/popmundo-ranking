@@ -91,8 +91,7 @@ class New(webapp.RequestHandler):
             self.response.out.write("Acesso negado")
             return
         logging.info("Criando novo genero")
-        rock = Genre(id=3, name='Rock', bands=[88342, 104937, 668859], lastUpdate=datetime.date.today())
-        rock.put()
+
 
 def auth_admin():
     user = users.get_current_user().email()
