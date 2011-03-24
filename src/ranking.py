@@ -15,8 +15,8 @@ class RankWriter(webapp.RequestHandler):
     def printHtml(self, rank, genre):
         for position in rank:
             try:
-                position.changeBr = "(%s)" % ("=" if position.brDiff == 0 else "*" if position.brDiff == 99999 else str(position.brDiff) if position.brDiff < 0 else "+"+str(position.brDiff))
-                position.changeWorld = "(%s)" % ("=" if position.diff == 0 else str(position.diff) if position.diff < 0 else "+"+str(position.diff))
+                position.changeBr = "(%s)" % ("=" if position.brDiff == 0 else "*" if position.brDiff > 500 else str(position.brDiff) if position.brDiff < 0 else "+"+str(position.brDiff))
+                position.changeWorld = "(%s)" % ("=" if position.diff == 0 else "*" if position.diff > 5000 else str(position.diff) if position.diff < 0 else "+"+str(position.diff))
             except:
                 logging.error("Erro ao imprimir artista %d", position.artistId)
                 
@@ -75,13 +75,23 @@ class Rock(RankWriter):
     def get(self):
         self.go(3, "rock")
 
+class Country(RankWriter):
+    def get(self):
+        self.go(13, "world music")
+
+class Flamenco(RankWriter):
+    def get(self):
+        self.go(19, "rock")
+
 class ListUnranked(webapp.RequestHandler):
     " " " Lista as bandas que nao conseguiram entrar no rank na ultima atualizacao " " "
     def get(self):
         genres = {16: 'Classica', 17: 'Latina', 4: 'Modern Rock', 5: 'Heavy Metal', 7: 'Eletronica', 8: 'Pop', 99: 'Remover'}
         unranked = db.GqlQuery("SELECT * FROM Artist WHERE rank = 99999").fetch(100)
+        if unranked is not None:
+            unranked.sort(key=lambda x:x.genre)
         for band in unranked:
-            self.response.out.write("%s: <a href='http://www.popmundo.com/Common/Artist.asp?action=view&ArtistID=%d'>banda fora do ranking</a><br/>" % (genres[band.genre], band.artistId))
+            self.response.out.write("%s: banda <a href='http://www.popmundo.com/Common/Artist.asp?action=view&ArtistID=%d'>%d</a> fora do ranking<br/>" % (genres[band.genre], band.artistId, band.artistId))
 
 application = webapp.WSGIApplication(
                                      [
@@ -93,6 +103,8 @@ application = webapp.WSGIApplication(
                                       ('/pop', Pop),
                                       ('/worldmusic', WorldMusic),
                                       ('/rock', Rock),
+                                      ('/country', Country),
+                                      ('/flamenco', Flamenco),
                                       ('/list', ListUnranked)],
                                       debug=True)
 

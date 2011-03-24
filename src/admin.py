@@ -81,6 +81,10 @@ class Create(webapp.RequestHandler):
         world.put()
         rock = Genre(id=3, name='Rock', bands=[88342, 104937, 668859], lastUpdate=datetime.date.today())
         rock.put()
+        country = Genre(id=13, name='Country', bands=[878064, 1161118, 460406, 420654, 1736000, 111160, 416977, 432889, 1559517, 1639868, 1785986, 683930, 1706062, 1663974, 1710956, 1255329, 1672775, 1636417, 1043343, 1734123], lastUpdate=datetime.date.today())
+        country.put()
+        flamenco = Genre(id=19, name='Flamenco', bands=[1239460, 1679342, 1169799, 1435443, 1021031, 1569030, 966987, 1235226, 1874444, 1181254, 1294504, 1110324, 1894517, 1898061, 1145421, 1550637, 1896162, 1670356], lastUpdate=datetime.date.today())
+        flamenco.put()
         teste = Genre(id=1, name='Teste', bands=[1,2], lastUpdate=datetime.date.today())
         teste.put()
 
@@ -116,7 +120,7 @@ def auth_genre(genre):
 
 
 application = webapp.WSGIApplication(
-                                     [('/admin/update', Manage), ('/admin/create', Create), ('/admin/new', New), ('/admin/user', User), ('/admin', Redirect)],
+                                     [('/admin/update', Manage), ('/admin/create_all_genres', Create), ('/admin/new', New), ('/admin/user', User), ('/admin', Redirect)],
                                      debug=True)
 
 def main():
