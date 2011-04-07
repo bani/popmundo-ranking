@@ -85,6 +85,10 @@ class Create(webapp.RequestHandler):
         country.put()
         flamenco = Genre(id=19, name='Flamenco', bands=[1239460, 1679342, 1169799, 1435443, 1021031, 1569030, 966987, 1235226, 1874444, 1181254, 1294504, 1110324, 1894517, 1898061, 1145421, 1550637, 1896162, 1670356], lastUpdate=datetime.date.today())
         flamenco.put()
+        punk = Genre(id=6, name='Punk Rock', bands=[285550, 198612, 43886, 1090139, 1253380, 94869, 1004668, 444071, 713094, 445527, 1212123, 1064185, 1686531, 777304, 59007, 497141, 1890722, 895187], lastUpdate=datetime.date.today())
+        punk.put()
+        blues = Genre(id=15, name='Blues', bands=[1114453, 325886, 22358, 908492, 471296, 1408613, 1141973, 1553171, 769437, 1775046, 1553743, 206950, 1260693, 332666, 65634, 314096, 1008820, 765669, 1668154, 798157, 832935, 497624, 443553, 1803588, 1677193, 32635, 1322332, 625994, 580518, 1534005], lastUpdate=datetime.date.today())
+        blues.put()
         teste = Genre(id=1, name='Teste', bands=[1,2], lastUpdate=datetime.date.today())
         teste.put()
 
