@@ -7,14 +7,15 @@ form {
 	background:#fff;
 	padding:1em;
 	border:1px solid #eee;
+    margin:1em;
+    width:12em;
 }
 fieldset div {
 	margin:0.3em 0;
 	clear:both;
 }
-form {
-	margin:1em;
-	width:27em;
+form.admin{
+    width:30em;
 }
 label.left{
 	float:left;
@@ -67,4 +68,19 @@ a#title {
 }
 .center {
 	text-align:center;
+}
+
+.left {
+  float: left;
+  width: 30%;
+}
+
+.middle {
+  margin-left: 2%;
+  margin-right: 2%;
+}
+
+.right {
+  float: right;
+  width: 30%;
 }
