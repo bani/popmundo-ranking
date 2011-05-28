@@ -24,7 +24,7 @@ class Mail(webapp.RequestHandler):
 
         message.send()
         
-        self.response.out.write("Pedido enviado com sucesso")
+        self.redirect("http://classicamundo.appspot.com/static/enviado.html")
 
 application = webapp.WSGIApplication(
                                      [

@@ -89,6 +89,9 @@ class Create(webapp.RequestHandler):
         punk.put()
         blues = Genre(id=15, name='Blues', bands=[1114453, 325886, 22358, 908492, 471296, 1408613, 1141973, 1553171, 769437, 1775046, 1553743, 206950, 1260693, 332666, 65634, 314096, 1008820, 765669, 1668154, 798157, 832935, 497624, 443553, 1803588, 1677193, 32635, 1322332, 625994, 580518, 1534005], lastUpdate=datetime.date.today())
         blues.put()
+        hiphop = Genre(id=9, name='Hip Hop', bands=[1408987, 1145465, 1888438, 469586, 1735906, 1775030, 537511, 724094, 486917, 635223, 1531885, 1256116, 121814, 1191277, 1781066, 1870652, 1539448, 1610234, 134068, 889270, 1656068, 1364480, 1839483], lastUpdate=datetime.date.today())
+        hiphop.put()
+
         teste = Genre(id=1, name='Teste', bands=[1,2], lastUpdate=datetime.date.today())
         teste.put()
 
@@ -99,6 +102,7 @@ class New(webapp.RequestHandler):
             self.response.out.write("Acesso negado")
             return
         logging.info("Criando novo genero")
+
 
 
 def auth_admin():
