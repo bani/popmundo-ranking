@@ -99,11 +99,14 @@ class RB(RankWriter):
     def get(self):
         self.go(10, "rb")
         
-
+class Jazz(RankWriter):
+    def get(self):
+        self.go(14, "jazz")
+        
 class ListUnranked(webapp.RequestHandler):
     " " " Lista as bandas que nao conseguiram entrar no rank na ultima atualizacao " " "
     def get(self):
-        genres = {16: 'Classica', 17: 'Latina', 4: 'Modern Rock', 5: 'Heavy Metal', 7: 'Eletronica', 8: 'Pop', 12: 'World Music', 3: 'Rock', 13: 'Country', 19: 'Flamenco', 6: 'Punk', 15: 'Blues', 9: 'Hip Hop', 10: 'R&B', 99: 'Remover'}
+        genres = {16: 'Classica', 17: 'Latina', 4: 'Modern Rock', 5: 'Heavy Metal', 7: 'Eletronica', 8: 'Pop', 12: 'World Music', 3: 'Rock', 13: 'Country', 19: 'Flamenco', 6: 'Punk', 15: 'Blues', 9: 'Hip Hop', 10: 'R&B', 14: 'Jazz', 99: 'Remover'}
         unranked = db.GqlQuery("SELECT * FROM Artist WHERE rank = 99999").fetch(100)
         if unranked is not None:
             unranked.sort(key=lambda x:x.genre)
@@ -126,6 +129,7 @@ application = webapp.WSGIApplication(
                                       ('/blues', Blues),
                                       ('/hiphop', HipHop),
                                       ('/rb', RB),
+                                      ('/jazz', Jazz),
                                       ('/list', ListUnranked)],
                                       debug=True)
 

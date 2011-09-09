@@ -93,7 +93,8 @@ class Create(webapp.RequestHandler):
         hiphop.put()
         rb = Genre(id=10, name='R&B', bands=[1402222, 1191044, 1671295, 1850711, 1795504, 568320, 1527471, 1533552, 1500414, 1876910], lastUpdate=datetime.date.today())
         rb.put()
-
+        jazz = Genre(id=14, name='Jazz', bands=[521474, 1915216, 66804, 895252, 218507, 979008, 487234, 88789, 641607, 1384114, 1407160, 26863, 1049948 , 664754, 254600, 1030796, 1834523, 1703631, 1418047, 1347204, 1371232 , 850752, 341800, 1518575, 229055, 939292, 586520, 1894212, 41474, 1825807], lastUpdate=datetime.date.today())
+        jazz.put()
         teste = Genre(id=1, name='Teste', bands=[1,2], lastUpdate=datetime.date.today())
         teste.put()
 
@@ -104,7 +105,6 @@ class New(webapp.RequestHandler):
             self.response.out.write("Acesso negado")
             return
         logging.info("Criando novo genero")
-
 
 
 
